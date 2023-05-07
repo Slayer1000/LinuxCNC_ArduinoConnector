@@ -1,5 +1,13 @@
-  #include <stdio.h>
-  #include <string.h>
+#include <stdio.h>
+//#include "stm32h7xx_hal.h"
+#include <string.h>
+#include <iostream>
+#include <algorithm>
+#include <iterator>
+
+using std::cout; using std::endl;
+using std::string; using std::reverse;
+
 /*
   LinuxCNC_ArduinoConnector
   By Alexander Richter, info@theartoftinkering.com 2022
@@ -207,7 +215,10 @@ Adafruit_NeoPixel strip(DLEDcount, DLEDPin, NEO_GRB + NEO_KHZ800);//Color sequen
 Matrix Keypads are supported. The input is NOT added as HAL Pin to LinuxCNC. Instead it is inserted to Linux as Keyboard direktly. 
 So you could attach a QWERT* Keyboard to the arduino and you will be able to write in Linux with it (only while LinuxCNC is running!)
 */
-//#define KEYPAD
+//
+#define KEYPAD
+
+#ifdef KEYPAD
 
 // Define the row and scan line pins
 #define RL0 22
@@ -244,17 +255,16 @@ So you could attach a QWERT* Keyboard to the arduino and you will be able to wri
 #define SL6 35
 #define SL7 37
 
-
 #define RLS 24
 #define SLS 8
 
-#ifdef KEYPAD
-const int numRows = 4;  // Define the number of rows in the matrix
-const int numCols = 4;  // Define the number of columns in the matrix
+const int numRows = RLS;  // Define the number of rows in the matrix
+const int numCols = SLS;  // Define the number of columns in the matrix
 
 // Define the pins connected to the rows and columns of the matrix
-const int rowPins[numRows] = {RL0, RL1, RL2, RL3, RL4, RL5, RL6, RL7, RL8, RL8, RL10, RL11, RL12, RL13, RL14, RL15, RL16, RL17, RL18, RL19, RL20, RL21, RL22, RL23 };
-const int colPins[numCols] = {SL0, SL1, SL2, SL3, SL4, SL5, SL6, SL7};
+// Define the pin mapping for RLS and scan lines
+uint32_t row_pins[RLS] = {RL0, RL1, RL2, RL3, RL4, RL5, RL6, RL7, RL8, RL8, RL10, RL11, RL12, RL13, RL14, RL15, RL16, RL17, RL18, RL19, RL20, RL21, RL22, RL23 };
+uint32_t col_pins[SLS] = {SL0, SL1, SL2, SL3, SL4, SL5, SL6, SL7};
 
 
  char* keys[RLS][SLS] = {
@@ -459,6 +469,7 @@ void loop() {
 #ifdef KEYPAD
   readKeypad(); //read Keyboard & send data
 #endif
+
 
 
 }
@@ -686,6 +697,10 @@ void readKeypad(){
         Serial.print(keys[row][col]);
         Serial.print(":");
         Serial.println(0);
+        //
+        string key = keys[row][col]
+        Serial.println(key.c_str());
+        //
         lastKey = 0;
         row = numRows;
       }
